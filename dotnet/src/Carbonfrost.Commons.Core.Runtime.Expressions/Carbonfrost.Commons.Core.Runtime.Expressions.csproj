@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../Build.props" />
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Carbonfrost.Commons.Core.Runtime.Expressions</RootNamespace>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Copyright>Copyright 2010-2019 Carbonfrost Systems, Inc.</Copyright>
+    <Authors>Carbonfrost</Authors>
+    <Description>
+      Provides a simple expression programming language with an AST
+      and serialization manager
+    </Description>
+    <PackageProjectUrl>https://github.com/Carbonfrost/f-core-runtime-expressions</PackageProjectUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Carbonfrost.Commons.Core" Version="0.2.1" />
+  </ItemGroup>
+</Project>
