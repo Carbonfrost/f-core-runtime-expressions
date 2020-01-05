@@ -1,0 +1,255 @@
+<#@ template language="C#" #>
+<#@ output extension=".g.cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Linq" #>
+<#@ assembly name="System.Core" #>
+<#
+
+    // Leaf expression types
+    string[] expressions = {
+        "ValueExpression",
+        "ConstantExpression",
+        "BlockExpression",
+        "ConditionalExpression",
+        "MemberAccessExpression",
+        "NameExpression",
+        "CallExpression",
+        "NewObjectExpression",
+        "NewArrayExpression",
+        "LambdaExpression",
+        // TODO "BetweenAndExpression"
+    };
+
+    string[] arithmeticExpressions = {
+        "Add",
+        "Subtract",
+        "Divide",
+        "Multiply",
+        "LeftShift",
+        "RightShift",
+        "Power",
+        "Modulo",
+    };
+
+    string[] logicalExpressions = {
+        "And",
+        "AndAlso",
+        "Or",
+        "OrElse",
+        "EqualTo",
+        "GreaterThan",
+        "GreaterThanOrEqual",
+        "LessThan",
+        "LessThanOrEqual",
+        "NotEqualTo",
+
+        "Coalesce",
+    };
+
+    string[] unaryExpressions = {
+         "PostDecrement",
+         "PostIncrement",
+         "PreDecrement",
+         "PreIncrement",
+         "Negate",
+         "NegateChecked",
+         "Not",
+         "OnesComplement",
+    };
+
+    var be = arithmeticExpressions.Concat(logicalExpressions);
+    var assignExpressions = (arithmeticExpressions.Concat(new [] { "And", "Or" })).Select(t => t + "Assign");
+    var binaryExpressions = be.Concat(assignExpressions);
+
+    string[] checkedExpressions = { "Add", "Subtract", "Multiply" };
+    Func<string, bool> IsChecked = m => (checkedExpressions.Any(t => (m.StartsWith(t))));
+#>
+    // Generated at <#= DateTime.Now #>
+
+using System;
+using Carbonfrost.Commons.Core.Runtime;
+
+namespace Carbonfrost.Commons.Core.Runtime.Expressions {
+
+    // TODO Need Checked and Assigned variants
+    public partial class Expression {
+
+        public static BinaryExpression MakeBinary(ExpressionType expressionType, Expression left, Expression right) {
+            if (left == null)
+                throw new ArgumentNullException("left");
+            if (right == null)
+                throw new ArgumentNullException("right");
+
+            switch (expressionType) {
+<#
+    foreach (string e in binaryExpressions) {
+#>
+                case ExpressionType.<#= e #>:
+                    return <#= e #>(left, right);
+
+<# if (IsChecked(e)) { #>
+                case ExpressionType.<#= e #>Checked:
+                    return <#= e #>Checked(left, right);
+<# } #>
+
+<# } #>
+                default:
+                    throw CoreRuntimeExpressionsFailure.NotBinaryExpressionType("expressionType", expressionType);
+            }
+        }
+
+        public static UnaryExpression MakeUnary(ExpressionType expressionType, Expression expression) {
+            if (expression == null)
+                throw new ArgumentNullException("expression");
+
+            switch (expressionType) {
+<#
+    foreach (string e in unaryExpressions) {
+#>
+                case ExpressionType.<#= e #>:
+                    return <#= e #>(expression);
+<# } #>
+                default:
+                    throw CoreRuntimeExpressionsFailure.NotBinaryExpressionType("expressionType", expressionType);
+            }
+        }
+<#
+    foreach (string e in unaryExpressions) {
+        string es = e.Replace("Expression", "");
+#>
+
+        public static UnaryExpression <#= e #>(Expression expression) {
+            if (expression == null)
+                throw new ArgumentNullException("expression");
+
+            return new UnaryExpression(ExpressionType.<#= e #>, expression);
+        }
+
+        public virtual Expression <#= es #>() {
+            return <#= e #>(this);
+        }
+<# } #>
+
+<#
+    foreach (string e in binaryExpressions) {
+        string es = e.Replace("Expression", "");
+#>
+
+        public static BinaryExpression <#= e #>(Expression left, Expression right) {
+            if (left == null)
+                throw new ArgumentNullException("left");
+            if (right == null)
+                throw new ArgumentNullException("right");
+
+            return new BinaryExpression(ExpressionType.<#= e #>, left, right);
+        }
+
+        public virtual Expression <#= es #>(Expression right) {
+            if (right == null)
+                throw new ArgumentNullException("right");
+
+            return <#= e #>(this, right);
+        }
+
+<# if (IsChecked(e)) { #>
+        public static BinaryExpression <#= e #>Checked(Expression left, Expression right) {
+            if (left == null)
+                throw new ArgumentNullException("left");
+            if (right == null)
+                throw new ArgumentNullException("right");
+
+            return new BinaryExpression(ExpressionType.<#= e #>Checked, left, right);
+        }
+<# } #>
+
+<# } #>
+
+    }
+
+<#
+    foreach (string e in expressions) {
+
+        string es = e.Replace("Expression", "");
+#>
+
+    public partial interface IExpressionVisitor {
+        void Visit(<#= e #> expression);
+    }
+
+    public partial class ExpressionVisitor {
+
+        protected virtual void Visit<#= e #>(<#= e #> expression) {
+            DefaultVisit(expression);
+        }
+
+        void IExpressionVisitor.Visit(<#= e #> expression) {
+            Visit<#= e #>(expression);
+        }
+    }
+
+    public partial interface IExpressionVisitor<TArgument, TResult> {
+        TResult Visit(<#= e #> expression, TArgument argument);
+    }
+
+    public partial class ExpressionVisitor<TArgument, TResult> {
+
+        protected virtual TResult Visit<#= e #>(<#= e #> expression, TArgument argument) {
+            return DefaultVisit(expression, argument);
+        }
+
+        TResult IExpressionVisitor<TArgument,TResult>.Visit(<#= e #> expression, TArgument argument) {
+            return Visit<#= e #>(expression, argument);
+        }
+    }
+
+    public partial interface IExpressionVisitor<TResult> {
+        TResult Visit(<#= e #> expression);
+    }
+
+    public partial class ExpressionVisitor<TResult> {
+
+        protected virtual TResult Visit<#= e #>(<#= e #> expression) {
+            return DefaultVisit(expression);
+        }
+
+        TResult IExpressionVisitor<TResult>.Visit(<#= e #> expression) {
+            return Visit<#= e #>(expression);
+        }
+
+    }
+
+    public partial class <#= e #> {
+
+        public override ExpressionType ExpressionType {
+            get {
+                return ExpressionType.<#= es #>;
+            }
+        }
+
+        protected internal override TResult AcceptVisitor<TResult>(IExpressionVisitor<TResult> visitor) {
+            if (visitor == null)
+                throw new ArgumentNullException("visitor");
+
+            return visitor.Visit(this);
+        }
+
+        protected internal override TResult AcceptVisitor<TArgument, TResult>(IExpressionVisitor<TArgument, TResult> visitor, TArgument argument) {
+            if (visitor == null)
+                throw new ArgumentNullException("visitor");
+
+            return visitor.Visit(this, argument);
+        }
+
+        protected internal override void AcceptVisitor(IExpressionVisitor visitor) {
+            if (visitor == null)
+                throw new ArgumentNullException("visitor");
+
+            visitor.Visit(this);
+        }
+    }
+
+<#
+    }
+#>
+
+ }
