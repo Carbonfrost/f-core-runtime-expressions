@@ -3,6 +3,7 @@
 <#@ import namespace="System" #>
 <#@ import namespace="System.Linq" #>
 <#@ assembly name="System.Core" #>
+<#@ assembly name="System.Linq" #>
 <#
 
     // Leaf expression types

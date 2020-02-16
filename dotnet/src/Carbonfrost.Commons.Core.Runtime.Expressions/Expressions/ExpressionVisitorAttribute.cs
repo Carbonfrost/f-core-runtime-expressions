@@ -23,13 +23,15 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
     public sealed class ExpressionVisitorAttribute : AdapterAttribute {
 
         public Type ExpressionVisitorType {
-            get { return this.AdapterType; }
+            get {
+                return AdapterType;
+            }
         }
 
         public ExpressionVisitorAttribute(Type adapterType)
-            : base(adapterType, AdapterRole.ExpressionVisitor) {}
+            : base(adapterType) {}
 
         public ExpressionVisitorAttribute(string adapterType)
-            : base(adapterType, AdapterRole.ExpressionVisitor) {}
+            : base(adapterType) {}
     }
 }
