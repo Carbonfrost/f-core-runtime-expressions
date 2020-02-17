@@ -188,7 +188,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(<#= e #> expression, TArgument argument);
     }
 
@@ -203,7 +203,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(<#= e #> expression);
     }
 

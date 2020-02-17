@@ -23,8 +23,8 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
     public static class Adaptable {
 
-        private static IDictionary<Type, IDictionary<string, PropertyInfo>> _propertyCache
-            = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
+        private static IDictionary<Type, Dictionary<string, PropertyInfo>> _propertyCache
+            = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
 
         public static BindingMode GetExpressionBindingMode(this PropertyInfo property) {
             if (property == null) {
@@ -62,11 +62,11 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
             return attr.Mode;
         }
 
-        internal static IDictionary<string, PropertyInfo> ReflectGetPropertiesCache(Type sourceClrType) {
+        internal static IReadOnlyDictionary<string, PropertyInfo> ReflectGetPropertiesCache(Type sourceClrType) {
             return _propertyCache.GetValueOrCache(sourceClrType, () => ReflectGetProperties(sourceClrType));
         }
 
-        private static IDictionary<string, PropertyInfo> ReflectGetProperties(Type sourceClrType) {
+        private static Dictionary<string, PropertyInfo> ReflectGetProperties(Type sourceClrType) {
             var baseType = sourceClrType;
             var names = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
             do {

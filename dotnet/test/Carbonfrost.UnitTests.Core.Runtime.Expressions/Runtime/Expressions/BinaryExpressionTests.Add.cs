@@ -99,6 +99,7 @@ namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
             var ex = Record.Exception(
                 () => expr.Evaluate()
             );
+            Console.WriteLine(ex);
             Assert.Contains("`hello' is not defined.", ex.Message);
         }
 

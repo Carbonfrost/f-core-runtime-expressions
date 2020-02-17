@@ -46,7 +46,8 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions.Serialization {
                 return _variableNames.GetValueOrDefault(id);
         }
 
-        public string DefineVariable(object value, out bool firstTime) {
+        public string DefineVariable(object value) {
+            bool firstTime;
             long id = _seen.GetId(value, out firstTime);
 
             if (firstTime) {

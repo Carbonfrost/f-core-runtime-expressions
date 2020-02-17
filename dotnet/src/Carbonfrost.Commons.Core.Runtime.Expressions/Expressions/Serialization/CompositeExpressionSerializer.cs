@@ -27,8 +27,8 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions.Serialization {
             if (ReferenceEquals(item, null))
                 return Expression.Null;
 
-            bool first;
-            var selfVarName = context.DefineVariable(item, out first);
+            bool first = context.GetVariable(item) == null;
+            var selfVarName = context.DefineVariable(item);
 
             if (first) {
                 IList<Expression> results = new List<Expression>();

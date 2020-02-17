@@ -1,5 +1,5 @@
-//
-// Copyright 2016, 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
+﻿//
+// Copyright 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,24 @@ using System;
 
 namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
-    public interface IExpressionContext : IServiceProvider {
-        bool TryGetIndex(object[] indexes, out object result);
-        bool TryGetMember(string name, out object result);
-        bool TrySetMember(string name, object value);
+    class NullExpressionContext : IExpressionContext {
+
+        public bool TryGetIndex(object[] indexes, out object result) {
+            result = null;
+            return false;
+        }
+
+        public bool TryGetMember(string name, out object result) {
+            result = null;
+            return false;
+        }
+
+        public bool TrySetMember(string name, object value) {
+            return false;
+        }
+
+        public object GetService(Type serviceType) {
+            return null;
+        }
     }
 }

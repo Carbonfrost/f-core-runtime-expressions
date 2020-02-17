@@ -15,11 +15,10 @@
 //
 
 using System;
-using Carbonfrost.Commons.Core.Runtime.Expressions;
 
-namespace Carbonfrost.Commons.Core.Runtime {
+namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
-    public static class Extensions {
+    partial class Extensions {
 
         public static Expression GetExpression(this IPropertyProvider properties, string property) {
             if (properties == null) {
