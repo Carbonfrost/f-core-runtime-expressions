@@ -1,11 +1,11 @@
 //
-// Copyright 2013, 2016 Carbonfrost Systems, Inc. (http://carbonfrost.com)
+// Copyright 2013, 2016, 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -25,44 +24,47 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
     internal sealed class Scanner : IEnumerator<Token> {
 
-        private static string endOfInput;
-        private int errorPosition;
+        private Token _current;
+        private int _pos;
+        private readonly string _expression;
 
-        private Token lookahead;
-        private int pos;
-        private string unexpectedlyFound;
-
-        private readonly string expression;
-
-        private string EndOfInput {
-            get {
-                if (endOfInput == null) {
-                    endOfInput = "<EOF>";
-                }
-                return endOfInput;
-            }
-        }
+        private const string EndOfInput = "<EOF>";
 
         public bool IsError {
             get {
-                return this.lookahead != null && this.lookahead.IsToken(TokenType.Error);
+                return _current != null && _current.IsToken(TokenType.Error);
             }
         }
 
         private char Char {
-            get { return this.expression[this.pos]; } }
+            get {
+                return _expression[_pos];
+            }
+        }
 
         internal bool MoreChars {
-            get { return this.pos < this.expression.Length; } }
+            get {
+                return _pos < _expression.Length;
+             }
+        }
 
-        internal string UnexpectedlyFound {
-            get { return this.unexpectedlyFound; } }
+        private bool PastEOF {
+            get {
+                return _pos >= _expression.Length;
+            }
+        }
 
         public Token Current {
-            get { return this.lookahead; } }
+            get {
+                return _current;
+            }
+        }
 
         object System.Collections.IEnumerator.Current {
-            get { return Current; } }
+            get {
+                return Current;
+            }
+        }
 
         public bool EOF {
             get {
@@ -77,41 +79,36 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         internal Scanner(string text) {
-            this.expression = text;
-            this.pos = 0;
-            this.errorPosition = -1;
-        }
-
-        internal int GetErrorPosition() {
-            return this.errorPosition;
+            _expression = text;
+            _pos = 0;
         }
 
         internal bool IsNext(TokenType type) {
-            return this.lookahead.IsToken(type);
+            return _current.IsToken(type);
         }
 
         internal string TakeValue() {
-            string s = this.lookahead.Value;
+            string s = _current.Value;
             MoveNext();
             return s;
         }
 
         private bool ParseNumericOrPlus(int start) {
             if (IsParseHexNumber()) {
-                this.pos += 2;
+                _pos += 2;
                 this.SkipHexDigits();
-                this.lookahead = new Token(TokenType.Number, Subtext(start));
+                _current = new Token(TokenType.Number, Subtext(start));
 
                 return true;
 
-            } else if (IsNumberStart(this.expression[this.pos])) {
+            } else if (IsNumberStart(Char)) {
                 if (this.Char == '+' || this.Char == '-') {
-                    this.pos++;
+                    _pos++;
                 }
 
                 this.SkipDigits();
                 if (MoreChars && (this.Char == '.')) {
-                    this.pos++;
+                    _pos++;
                 }
 
                 if (MoreChars) {
@@ -128,22 +125,20 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                 return SetToken(new Token(TokenType.Number, text));
 
             } else {
-
-                this.lookahead = Token.Error;
-                this.errorPosition = start + 1;
+                _current = Token.UnexpectedlyFound(start + 1, Char.ToString());
                 return false;
             }
         }
 
         private bool SetToken(Token token) {
-            this.lookahead = token;
+            _current = token;
             return true;
         }
 
         private bool IsParseHexNumber() {
-            if (expression.Length - this.pos > 2) {
-                char c = expression[this.pos];
-                char d = expression[this.pos + 1];
+            if (_expression.Length - _pos > 2) {
+                char c = _expression[_pos];
+                char d = _expression[_pos + 1];
 
                 return c == '0' && (d == 'x' || d == 'X');
             }
@@ -152,36 +147,32 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         private bool ParseProperty() {
-            int start = this.pos;
-            this.pos++; // move past $
+            int start = _pos;
+            _pos++; // move past $
 
             if (MoreChars && this.Char != '(') {
-                this.lookahead = Token.Error;
-                this.errorPosition = start + 1;
-                this.unexpectedlyFound = Convert.ToString(this.expression[this.pos], CultureInfo.InvariantCulture);
+                _current = Token.UnexpectedlyFound(start + 1, Char);
                 return false;
             }
 
-            this.pos = ScanForPropertyExpressionEnd(this.expression, this.pos++);
-            if (this.pos >= this.expression.Length) {
-                this.lookahead = Token.Error;
-                this.errorPosition = start + 1;
-                this.unexpectedlyFound = this.EndOfInput;
+            _pos = ScanForPropertyExpressionEnd(_expression, _pos++);
+            if (PastEOF) {
+                _current = Token.UnexpectedlyFound(start + 1, EndOfInput);
                 return false;
             }
 
-            this.pos++;
+            _pos++;
 
             string tokenString = this.Subtext(start);
-            this.lookahead = new Token(TokenType.Property, tokenString);
+            _current = new Token(TokenType.Property, tokenString);
             return true;
         }
 
         private bool ParseQuotedString() {
             char startChar = this.Char;
 
-            this.pos++;
-            int start = this.pos;
+            _pos++;
+            int start = _pos;
             bool expandable = false;
 
             // TODO Revisit if different semantics should be applied depending upon
@@ -192,28 +183,27 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
             // TODO Trap unterminated expansions here
             while (this.MoreChars && this.Char != startChar) {
                 if (this.Char == '$'
-                    && this.pos + 1 < this.expression.Length
-                    && this.expression[this.pos + 1] == '{') {
+                    && _pos + 1 < _expression.Length
+                    && _expression[_pos + 1] == '{') {
                     expandable = true;
                 }
 
-                this.pos++;
+                _pos++;
             }
 
-            if (this.pos >= this.expression.Length) {
-                this.lookahead = Token.Error;
-                this.errorPosition = start;
+            if (PastEOF) {
+                _current = Token.Error(start, EndOfInput);
                 return false;
             }
 
             string tokenString = this.Subtext(start);
-            this.lookahead = new Token(TokenType.String, tokenString/*, expandable*/);
-            this.pos++;
+            _current = new Token(TokenType.String, tokenString/*, expandable*/);
+            _pos++;
             return true;
         }
 
         private bool ParseRemaining() {
-            int start = this.pos;
+            int start = _pos;
 
             if (IsNumberStart(this.Char)) {
                 return ParseNumericOrPlus(start);
@@ -222,9 +212,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                 return ParseSimpleStringOrFunction(start);
 
             } else {
-                this.lookahead = Token.Error;
-                this.errorPosition = start + 1;
-                this.unexpectedlyFound = this.Char.ToString();
+                _current = Token.UnexpectedlyFound(start + 1, Char);
                 return false;
             }
         }
@@ -234,18 +222,18 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
             Token t = TryIdentAsKeyword(start);
             if (t != null) {
-                this.lookahead = t;
+                _current = t;
 
             } else {
-                int myStart = this.pos;
+                int myStart = _pos;
                 this.SkipWhiteSpace();
 
                 if (MoreChars && this.Char == '(') {
-                    this.lookahead = new Token(TokenType.Function, this.expression.Substring(start, myStart - start));
+                    _current = new Token(TokenType.Function, _expression.Substring(start, myStart - start));
 
                 } else {
-                    string tokenString = this.expression.Substring(start, myStart - start);
-                    this.lookahead = new Token(TokenType.Identifier, tokenString);
+                    string tokenString = _expression.Substring(start, myStart - start);
+                    _current = new Token(TokenType.Identifier, tokenString);
                 }
             }
 
@@ -313,7 +301,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
         private void Skip2(Func<char, bool> predicate) {
             while (this.MoreChars && predicate(this.Char))
-                this.pos++;
+                _pos++;
         }
 
         private void SkipSimpleStringChars() {
@@ -333,42 +321,35 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         private string Subtext(int start) {
-            return this.expression.Substring(start, this.pos - start);
+            return _expression.Substring(start, _pos - start);
         }
 
         void IDisposable.Dispose() {}
-
-        public void RequireMoveNext() {
-            if (MoveNext())
-                return;
-            else
-                throw new NotImplementedException("Unterminated");
-        }
 
         public bool MoveNext() {
             if (IsError)
                 return false;
 
-            if (this.lookahead != null && this.lookahead.IsToken(TokenType.EndOfInput))
+            if (_current != null && _current.IsToken(TokenType.EndOfInput))
                 return true;
 
             this.SkipWhiteSpace();
-            this.errorPosition = this.pos + 1;
+            // this.errorPosition = _pos + 1;
 
-            if (this.pos >= this.expression.Length) {
-                this.lookahead = Token.EndOfInput;
+            if (PastEOF) {
+                _current = Token.EndOfInput;
                 return true;
             }
 
             switch (this.Char) {
                 case '!':
                     if (LA('=')) {
-                        this.lookahead = Token.NotEqualTo;
-                        this.pos += 2;
+                        _current = Token.NotEqualTo;
+                        _pos += 2;
 
                     } else {
-                        this.lookahead = Token.Not;
-                        this.pos++;
+                        _current = Token.Not;
+                        _pos++;
                     }
 
                     return true;
@@ -406,69 +387,69 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
                 case '<':
                     if (LA('=')) {
-                        this.lookahead = Token.LessThanOrEqualTo;
-                        this.pos += 2;
+                        _current = Token.LessThanOrEqualTo;
+                        _pos += 2;
 
                     } else {
-                        this.lookahead = Token.LessThan;
-                        this.pos++;
+                        _current = Token.LessThan;
+                        _pos++;
                     }
                     return true;
 
                 case '=':
                     if (LA('=')) {
-                        this.lookahead = Token.EqualTo;
-                        this.pos += 2;
+                        _current = Token.EqualTo;
+                        _pos += 2;
                         return true;
 
                     } else {
-                        this.errorPosition = this.pos + 2;
+                        int errorPosition = _pos + 2;
 
-                        if ((this.pos + 1) < this.expression.Length) {
-                            this.unexpectedlyFound = Convert.ToString(this.expression[this.pos + 1], CultureInfo.InvariantCulture);
+                        if ((_pos + 1) < _expression.Length) {
+                            _current = Token.UnexpectedlyFound(errorPosition, _expression[_pos + 1]);
 
                         } else {
-                            this.unexpectedlyFound = this.EndOfInput;
+                            _current = Token.UnexpectedlyFound(errorPosition, EndOfInput);
                         }
 
-                        this.pos++;
-                        this.lookahead = Token.Error;
+                        _pos++;
+
                         return false;
                     }
 
                 case '>':
                     if (LA('=')) {
-                        this.lookahead = Token.GreaterThanOrEqualTo;
-                        this.pos += 2;
+                        _current = Token.GreaterThanOrEqualTo;
+                        _pos += 2;
 
                     } else {
-                        this.lookahead = Token.GreaterThan;
-                        this.pos++;
+                        _current = Token.GreaterThan;
+                        _pos++;
 
                     }
                     return true;
 
                 case '&':
                     if (LA('&')) {
-                        this.lookahead = Token.And;
-                        this.pos += 2;
+                        _current = Token.And;
+                        _pos += 2;
                         return true;
 
                     } else {
-                        this.lookahead = Token.BitAnd;
-                        this.pos++;
+                        _current = Token.BitAnd;
+                        _pos++;
                         return true;
                     }
 
                 case '|':
                     if (LA('|')) {
-                        this.lookahead = Token.Or;
-                        this.pos += 2;
+                        _current = Token.Or;
+                        _pos += 2;
                         return true;
 
                     } else {
-                        this.lookahead = Token.BitOr;
-                        this.pos++;
+                        _current = Token.BitOr;
+                        _pos++;
                         return true;
                     }
             }
@@ -477,14 +458,14 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         private bool Simple(Token leftParen) {
-            this.lookahead = leftParen;
-            this.pos++;
+            _current = leftParen;
+            _pos++;
             return true;
         }
 
         private bool LA(char c) {
-            return (this.pos + 1) < this.expression.Length
-                & this.expression[this.pos + 1] == c;
+            return (_pos + 1) < _expression.Length
+                & _expression[_pos + 1] == c;
         }
 
         void System.Collections.IEnumerator.Reset()  {

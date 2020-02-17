@@ -1,11 +1,11 @@
 //
-// Copyright 2013, 2016 Carbonfrost Systems, Inc. (http://carbonfrost.com)
+// Copyright 2013, 2016, 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
+using System;
+using System.Globalization;
+using Carbonfrost.Commons.Core.Runtime.Expressions.Resources;
 
 namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
@@ -69,6 +73,17 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
+    internal class ErrorToken : Token {
+
+        public readonly string Message;
+        public readonly int ErrorPosition;
+
+        internal ErrorToken(int position, string message) : base(TokenType.Error, null) {
+            Message = message;
+            ErrorPosition = position;
+        }
+    }
+
     internal class Token {
 
         internal static readonly Token And = new Token(TokenType.And);
@@ -99,7 +114,19 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         internal static readonly Token True = new Token(TokenType.True);
         internal static readonly Token Undefined = new Token(TokenType.Undefined);
 
-        internal static readonly Token Error = new Token(TokenType.Error);
+        internal static ErrorToken UnexpectedlyFound(int position, char unexpectedlyFound) {
+            var message = SR.ParserUnexpectedlyFound(Convert.ToString(unexpectedlyFound, CultureInfo.InvariantCulture));
+            return new ErrorToken(position, message);
+        }
+
+        internal static ErrorToken UnexpectedlyFound(int position, string unexpectedlyFound) {
+            var message = SR.ParserUnexpectedlyFound(unexpectedlyFound);
+            return new ErrorToken(position, message);
+        }
+
+        internal static Token Error(int position, string message) {
+            return new ErrorToken(position, message);
+        }
 
         private readonly string _text;
         private readonly TokenType _type;

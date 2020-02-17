@@ -41,6 +41,10 @@ namespace Carbonfrost.Commons.Core.Runtime {
             return Failure.Prepare(new InvalidOperationException(SR.CannotReduceExpression()));
         }
 
+        public static SyntaxErrorException ParserUnexpectedEOF() {
+            return Failure.Prepare(new SyntaxErrorException(SR.ParserUnexpectedEOF()));
+        }
+
         public static InvalidOperationException CannotEvaluateNonConstantExpression() {
             return Failure.Prepare(new InvalidOperationException(SR.CannotEvaluateNonConstantExpression()));
         }
@@ -51,6 +55,10 @@ namespace Carbonfrost.Commons.Core.Runtime {
 
         public static ArgumentException ExpressionContextInvalidIndexCount(string argName) {
             return Failure.Prepare(new ArgumentException(SR.ExpressionContextInvalidIndexCount(), argName));
+        }
+
+        public static SyntaxErrorException SyntaxErrorUnexpected(string value) {
+            return Failure.Prepare(new SyntaxErrorException(SR.ParserUnexpectedlyFound(value)));
         }
     }
 }
