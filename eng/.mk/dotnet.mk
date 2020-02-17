@@ -11,7 +11,6 @@
 #    │   └── Project1
 #    │       ├── Automation  -- (Optional) String resources, text templates, etc.
 #    │       │   ├── SR.properties
-#    │       │   ├── TextTemplates
 #    │       │   └── TextTemplates
 #    │       ├── Project1.csproj
 #    │       └── (source files)
@@ -42,7 +41,7 @@ dotnet/configure: -check-env-NUGET_SOURCE_URL -check-env-NUGET_PASSWORD -check-e
 
 ## Restore package dependencies
 dotnet/restore:
-	@ dotnet restore ./dotnet
+	@ dotnet restore --use-lock-file ./dotnet
 
 ## Build the dotnet solution
 dotnet/build: dotnet/restore -dotnet/build
@@ -55,6 +54,10 @@ dotnet/push: dotnet/pack -dotnet/push
 
 ## Executes dotnet publish
 dotnet/publish: dotnet/build -dotnet/publish
+
+## Executes dotnet clean
+dotnet/clean:
+	@ rm -rdf dotnet/{src,test}/*/{bin,obj}/*
 
 -dotnet/build:
 	@ eval $(shell eng/build_env); \
@@ -74,5 +77,3 @@ dotnet/publish: dotnet/build -dotnet/publish
 		curl -X PUT -u "$(NUGET_USER_NAME):$(NUGET_PASSWORD)" -F package=@$$f $(NUGET_UPLOAD_URL); \
 	done
 
-release/requirements:
-	@ eng/release_requirements

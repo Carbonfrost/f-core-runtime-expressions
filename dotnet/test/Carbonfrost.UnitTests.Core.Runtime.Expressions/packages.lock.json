@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETCoreApp,Version=v3.0": {
+      "Carbonfrost.Commons.Spec": {
+        "type": "Direct",
+        "requested": "[0.2.0, )",
+        "resolved": "0.2.0",
+        "contentHash": "zxynWGEmR5xbZqcJ6p2r/mPFV4GhRkciTYvrQgKgoEY9GHA3+IEz31E0o/v/dxJUHKQfJ20naElQ/n3ZEM1Mag=="
+      },
+      "Carbonfrost.Commons.Core": {
+        "type": "Transitive",
+        "resolved": "0.3.0",
+        "contentHash": "Rcuyg1duOpslIsY/W5jF81DRb7IFXdqZPe3Ddx3fpulw5SKxhOJ29g6ObOeVdHJp7OdwBRFg2zDZdL+LiF1N5w=="
+      },
+      "carbonfrost.commons.core.runtime.expressions": {
+        "type": "Project",
+        "dependencies": {
+          "Carbonfrost.Commons.Core": "0.3.0"
+        }
+      }
+    }
+  }
+}
