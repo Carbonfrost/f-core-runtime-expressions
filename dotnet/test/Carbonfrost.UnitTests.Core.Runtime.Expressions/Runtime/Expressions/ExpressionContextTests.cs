@@ -24,6 +24,12 @@ namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
     public class ExpressionContextTests {
 
         [Fact]
+        public void GetDynamicMemberNames_should_contain_helpers() {
+            var subject = new ExpressionContext();
+            Assert.SetEqual(new [] { "Parent", "Data", "DataProviders" }, subject.GetDynamicMemberNames());
+        }
+
+        [Fact]
         public void TryGetIndex_should_require_index_rank_one() {
             dynamic ec = new ExpressionContext();
             Assert.Throws<ArgumentException>(() => ec["a", "b"].ToString());

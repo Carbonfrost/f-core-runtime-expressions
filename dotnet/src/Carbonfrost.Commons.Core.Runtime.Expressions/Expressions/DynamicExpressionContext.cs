@@ -30,7 +30,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
         private IReadOnlyDictionary<string, PropertyInfo> Properties {
             get {
-                return Adaptable.ReflectGetPropertiesCache(GetType());
+                return PropertyCache.ReflectGetPropertiesCache(GetType());
             }
         }
 

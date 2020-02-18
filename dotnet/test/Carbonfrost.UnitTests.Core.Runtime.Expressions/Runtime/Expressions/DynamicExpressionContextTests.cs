@@ -24,7 +24,7 @@ namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
         [Fact]
         public void GetDynamicMemberNames_should_contain_parent() {
             var subject = new DynamicExpressionContext();
-            Assert.Equal(new [] { "$parent" }, subject.GetDynamicMemberNames());
+            Assert.Equal(new [] { "Parent" }, subject.GetDynamicMemberNames());
         }
 
         class PDynamic : DynamicExpressionContext {

@@ -70,7 +70,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions.Serialization {
                                     ICollection<Expression> results)
         {
             // TODO Use a stack to track circular references
-            var properties = Adaptable.ReflectGetPropertiesCache(item.GetType()).Values;
+            var properties = PropertyCache.ReflectGetPropertiesCache(item.GetType()).Values;
 
             foreach (PropertyInfo pd in properties) {
                 var mode = pd.GetExpressionSerializationMode();
