@@ -55,16 +55,13 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
             return false;
         }
 
-        public void MakeReadOnly() {
-            IsReadOnly = true;
-        }
-
-        public bool IsReadOnly {
-            get;
-            private set;
-        }
-
         public object GetService(Type serviceType) {
+            foreach (var m in _contexts) {
+                var service = m.GetService(serviceType);
+                if (service != null) {
+                    return service;
+                }
+            }
             return null;
         }
     }

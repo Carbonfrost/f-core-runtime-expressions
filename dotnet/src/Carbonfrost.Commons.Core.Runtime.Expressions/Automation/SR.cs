@@ -98,6 +98,20 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions.Resources {
         return string.Format(Culture, ResourceFinder("NotBinaryExpressionType") , @value);
     }
 
+  /// <summary>Unexpected end of input</summary>
+    internal static string ParserUnexpectedEOF(
+
+    ) {
+        return string.Format(Culture, ResourceFinder("ParserUnexpectedEOF") );
+    }
+
+  /// <summary>Unexpected `${char}'</summary>
+    internal static string ParserUnexpectedlyFound(
+    object @char
+    ) {
+        return string.Format(Culture, ResourceFinder("ParserUnexpectedlyFound") , @char);
+    }
+
   /// <summary>Reference error: `${name}' is not defined.</summary>
     internal static string ReferenceError(
     object @name

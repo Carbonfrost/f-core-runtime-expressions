@@ -16,15 +16,11 @@
 
 
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
     public static class Adaptable {
-
-        private static IDictionary<Type, IDictionary<string, PropertyInfo>> _propertyCache
-            = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
 
         public static BindingMode GetExpressionBindingMode(this PropertyInfo property) {
             if (property == null) {
@@ -60,24 +56,6 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
             }
 
             return attr.Mode;
-        }
-
-        internal static IDictionary<string, PropertyInfo> ReflectGetPropertiesCache(Type sourceClrType) {
-            return _propertyCache.GetValueOrCache(sourceClrType, () => ReflectGetProperties(sourceClrType));
-        }
-
-        private static IDictionary<string, PropertyInfo> ReflectGetProperties(Type sourceClrType) {
-            var baseType = sourceClrType;
-            var names = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
-            do {
-                foreach (var prop in baseType.GetTypeInfo().GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)) {
-                    if (prop.GetIndexParameters().Length == 0 && !names.ContainsKey(prop.Name)) {
-                        names.Add(prop.Name, prop);
-                    }
-                }
-                baseType = baseType.GetTypeInfo().BaseType == null ? null : baseType.GetTypeInfo().BaseType;
-            } while (baseType != null && baseType != typeof(object));
-            return names;
         }
     }
 }

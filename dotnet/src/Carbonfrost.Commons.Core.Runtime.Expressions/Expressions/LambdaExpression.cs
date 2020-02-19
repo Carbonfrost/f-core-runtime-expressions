@@ -68,7 +68,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                 myArguments.Data[Parameters[index++].Name] = arg;
             }
 
-            var combined = ExpressionContext.Combine(myArguments, context, Closure);
+            var combined = ExpressionContext.Compose(myArguments, context, Closure);
             return Body.Evaluate(combined);
         }
     }

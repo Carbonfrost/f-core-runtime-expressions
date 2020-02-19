@@ -1,5 +1,5 @@
 //
-// Copyright 2015 Carbonfrost Systems, Inc. (http://carbonfrost.com)
+// Copyright 2015, 2020 Carbonfrost Systems, Inc. (http://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-using System;
-using System.Linq;
 using Carbonfrost.Commons.Core.Runtime;
 using Carbonfrost.Commons.Core.Runtime.Expressions;
 using Carbonfrost.Commons.Spec;
@@ -63,7 +61,7 @@ namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
 
         [Fact]
         public void MemberAccess_should_dereference_from_name_scope() {
-            var ec = new ExpressionContext(null, new NameScope { { "hello", new { world = "w" } } });
+            var ec = ExpressionContext.FromNameScope(new NameScope { { "hello", new { world = "w" } } });
             var expr = Expression.Parse("hello.world");
             Assert.Equal("w", expr.Evaluate(ec));
         }

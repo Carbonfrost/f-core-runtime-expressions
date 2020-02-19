@@ -1,5 +1,5 @@
 //
-// Copyright 2016, 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
+// Copyright 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,22 @@
 //
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
-    public interface IExpressionContext : IServiceProvider {
-        bool TryGetIndex(object[] indexes, out object result);
-        bool TryGetMember(string name, out object result);
-        bool TrySetMember(string name, object value);
+    public class SyntaxErrorException : FormatException {
+
+        public SyntaxErrorException() {
+        }
+
+        public SyntaxErrorException(string message) : base(message) {
+        }
+
+        public SyntaxErrorException(string message, Exception innerException) : base(message, innerException) {
+        }
+
+        protected SyntaxErrorException(SerializationInfo info, StreamingContext context) : base(info, context) {
+        }
     }
 }

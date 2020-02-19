@@ -24,6 +24,9 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
     class EmptyAnnotationList : AnnotationList {
 
         public override AnnotationList Add(object annotation) {
+            if (annotation == null) {
+                throw new ArgumentNullException("annotation");
+            }
             return new SingletonAnnotationList(annotation);
         }
 

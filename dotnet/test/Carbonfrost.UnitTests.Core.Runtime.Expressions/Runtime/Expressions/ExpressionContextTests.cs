@@ -1,11 +1,11 @@
 //
-// Copyright 2015 Carbonfrost Systems, Inc. (http://carbonfrost.com)
+// Copyright 2015, 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,12 @@ using Carbonfrost.Commons.Spec;
 namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
 
     public class ExpressionContextTests {
+
+        [Fact]
+        public void GetDynamicMemberNames_should_contain_helpers() {
+            var subject = new ExpressionContext();
+            Assert.SetEqual(new [] { "Parent", "Data", "DataProviders" }, subject.GetDynamicMemberNames());
+        }
 
         [Fact]
         public void TryGetIndex_should_require_index_rank_one() {
@@ -41,16 +47,19 @@ namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
             var ns = new NameScope {
                 { "c", obj }
             };
-            dynamic ec = new ExpressionContext(null, ns);
+            dynamic ec = ExpressionContext.FromNameScope(ns);
             Assert.Same(obj, ec["c"]);
         }
 
-        // [Fact]
-        // public void Clone_should_be_read_write() {
-        //     var ec = new ExpressionContext().AndMakeReadOnly();
-        //     var clone = ec.Clone();
-        //     Assert.False(clone.IsReadOnly);
-        // }
+        [Fact]
+        public void TryGetMember_using_dynamic_member_should_get_member() {
+            dynamic subject = new ExpressionContext();
+            subject.A = "hello";
+
+            object result;
+            Assert.True(((IExpressionContext) subject).TryGetMember("A", out result));
+            Assert.Equal("hello", result);
+        }
 
         [Fact]
         public void Clone_should_copy_collections() {
@@ -63,15 +72,6 @@ namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
             Assert.NotSame(ec.Data, clone.Data);
             Assert.SetEqual(ec.DataProviders, clone.DataProviders);
             Assert.SetEqual(ec.Data, clone.Data);
-        }
-
-        [Fact]
-        public void Clone_should_copy_memberwise() {
-            var ec = new ExpressionContext(
-                ExpressionContext.Empty, NameScope.Empty);
-            var clone = ec.Clone();
-            Assert.Same(ExpressionContext.Empty, clone.Parent);
-            Assert.Same(NameScope.Empty, clone.NameScope);
         }
     }
 }

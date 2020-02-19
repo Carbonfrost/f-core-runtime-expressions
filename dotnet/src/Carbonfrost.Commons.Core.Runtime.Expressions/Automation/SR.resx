@@ -73,6 +73,12 @@
   <data name="NotBinaryExpressionType" xml:space="preserve">
     <value>Expression type is not a binary expression type: {0}.</value>
   </data>
+  <data name="ParserUnexpectedEOF" xml:space="preserve">
+    <value>Unexpected end of input</value>
+  </data>
+  <data name="ParserUnexpectedlyFound" xml:space="preserve">
+    <value>Unexpected `{0}'</value>
+  </data>
   <data name="ReferenceError" xml:space="preserve">
     <value>Reference error: `{0}' is not defined.</value>
   </data>

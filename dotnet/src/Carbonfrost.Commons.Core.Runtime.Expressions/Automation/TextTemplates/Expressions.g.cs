@@ -1,6 +1,7 @@
-    // Generated at 01/19/2017 22:27:58
+﻿    // Generated at 02/16/2020 18:55:16
 
 using System;
+using Carbonfrost.Commons.Core.Runtime;
 
 namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
@@ -850,7 +851,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(ValueExpression expression, TArgument argument);
     }
 
@@ -865,7 +866,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(ValueExpression expression);
     }
 
@@ -927,7 +928,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(ConstantExpression expression, TArgument argument);
     }
 
@@ -942,7 +943,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(ConstantExpression expression);
     }
 
@@ -1004,7 +1005,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(BlockExpression expression, TArgument argument);
     }
 
@@ -1019,7 +1020,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(BlockExpression expression);
     }
 
@@ -1081,7 +1082,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(ConditionalExpression expression, TArgument argument);
     }
 
@@ -1096,7 +1097,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(ConditionalExpression expression);
     }
 
@@ -1158,7 +1159,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(MemberAccessExpression expression, TArgument argument);
     }
 
@@ -1173,7 +1174,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(MemberAccessExpression expression);
     }
 
@@ -1235,7 +1236,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(NameExpression expression, TArgument argument);
     }
 
@@ -1250,7 +1251,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(NameExpression expression);
     }
 
@@ -1312,7 +1313,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(CallExpression expression, TArgument argument);
     }
 
@@ -1327,7 +1328,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(CallExpression expression);
     }
 
@@ -1389,7 +1390,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(NewObjectExpression expression, TArgument argument);
     }
 
@@ -1404,7 +1405,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(NewObjectExpression expression);
     }
 
@@ -1466,7 +1467,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(NewArrayExpression expression, TArgument argument);
     }
 
@@ -1481,7 +1482,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(NewArrayExpression expression);
     }
 
@@ -1543,7 +1544,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(LambdaExpression expression, TArgument argument);
     }
 
@@ -1558,7 +1559,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(LambdaExpression expression);
     }
 

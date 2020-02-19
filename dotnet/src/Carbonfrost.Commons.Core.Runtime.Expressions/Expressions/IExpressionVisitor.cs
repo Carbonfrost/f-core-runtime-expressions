@@ -23,12 +23,12 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         void Visit(UnaryExpression expression);
     }
 
-    public partial interface IExpressionVisitor<TArgument, TResult> {
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
         TResult Visit(BinaryExpression expression, TArgument argument);
         TResult Visit(UnaryExpression expression, TArgument argument);
     }
 
-    public partial interface IExpressionVisitor<TResult> {
+    public partial interface IExpressionVisitor<out TResult> {
         TResult Visit(BinaryExpression expression);
         TResult Visit(UnaryExpression expression);
     }

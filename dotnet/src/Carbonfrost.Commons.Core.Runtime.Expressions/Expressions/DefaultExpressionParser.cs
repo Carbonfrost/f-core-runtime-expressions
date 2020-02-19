@@ -45,6 +45,14 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
             return LHSExpression(s);
         }
 
+        private void RequireMoveNext(Scanner s) {
+            if (s.MoveNext()) {
+                return;
+            }
+            throw CoreRuntimeExpressionsFailure.ParserUnexpectedEOF();
+        }
+
+
         // exp_member -> exp_primary |  exp_function ;
         private Expression MemberExpression(Scanner s) {
             if (s.Type == TokenType.Function) {
@@ -57,11 +65,11 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         Expression ExpUnary(Scanner s) {
             switch (s.Type) {
                 case TokenType.Not:
-                    s.RequireMoveNext();
+                    RequireMoveNext(s);
                     return Expression.Not(ExpUnary(s));
 
                 case TokenType.Minus:
-                    s.RequireMoveNext();
+                    RequireMoveNext(s);
                     return Expression.Negate(ExpUnary(s));
             }
 
@@ -89,7 +97,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
                 switch (s.Type) {
                     case TokenType.Dot:
-                        s.RequireMoveNext();
+                        RequireMoveNext(s);
                         left = MemberAccess(left, s);
                         break;
 
@@ -186,8 +194,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                     s.MoveNext();
                     return it;
             }
-
-            throw new NotImplementedException(s.Type.ToString());
+            throw CoreRuntimeExpressionsFailure.SyntaxErrorUnexpected(s.Current.Value);
         }
 
         // exp_function -> 'function' Identifier? '(' parameters ')' '{' function_body '}' ;
@@ -254,7 +261,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         Expression ParseBinaryExpr(Scanner s, Expression left) {
             var tokenType = s.Type;
             var type = MapExprType(tokenType);
-            s.RequireMoveNext();
+            RequireMoveNext(s);
             var right = MemberExpression(s);
 
             if (s.EOF || MapExprType(s.Type) == ExpressionType.Unknown) {

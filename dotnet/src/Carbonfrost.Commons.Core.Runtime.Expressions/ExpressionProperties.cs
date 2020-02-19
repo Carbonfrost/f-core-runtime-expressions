@@ -27,7 +27,6 @@ namespace Carbonfrost.Commons.Core.Runtime {
 
         private readonly IProperties _store;
         private readonly IExpressionBinding _binding;
-        private readonly IExpressionBinding NullBindingImpl = new NullBindingImplClass();
 
         protected IProperties Properties {
             get {
@@ -37,7 +36,7 @@ namespace Carbonfrost.Commons.Core.Runtime {
 
         public ExpressionProperties() {
             _store = new Properties();
-            _binding = NullBindingImpl;
+            _binding = ExpressionBinding.Null;
         }
 
         internal ExpressionProperties(IExpressionBinding binding, IPropertyStore propertyStore) : this(propertyStore) {
@@ -48,7 +47,7 @@ namespace Carbonfrost.Commons.Core.Runtime {
             if (propertyStore == null) {
                 throw new ArgumentNullException("propertyStore");
             }
-            _binding = NullBindingImpl;
+            _binding = ExpressionBinding.Null;
             var properties = propertyStore as IProperties;
             if (properties != null) {
                 _store = properties;
@@ -85,12 +84,7 @@ namespace Carbonfrost.Commons.Core.Runtime {
         }
 
         public void SetProperty(string property, object value) {
-            if (property == null) {
-                throw new ArgumentNullException("property");
-            }
-            if (string.IsNullOrEmpty(property)) {
-                throw Failure.EmptyString("property");
-            }
+            CheckProperty(property);
 
             if (value is Expression && _binding.GetBindingMode(property) == BindingMode.Disabled) {
                 var ec = CreateExpressionContext();
@@ -105,12 +99,8 @@ namespace Carbonfrost.Commons.Core.Runtime {
         }
 
         public bool TryGetProperty(string property, Type propertyType, out object value) {
-            if (property == null) {
-                throw new ArgumentNullException("property");
-            }
-            if (string.IsNullOrEmpty(property)) {
-                throw Failure.EmptyString("property");
-            }
+            CheckProperty(property);
+
             propertyType = propertyType ?? typeof(object);
             if (_store.TryGetProperty(property, typeof(object), out value)) {
                 var e = value as Expression;
@@ -154,12 +144,12 @@ namespace Carbonfrost.Commons.Core.Runtime {
             return _binding.CreateExpressionContext();
         }
 
-        class NullBindingImplClass : IExpressionBinding {
-            public ExpressionContext CreateExpressionContext() {
-                return new ExpressionContext();
+        private static void CheckProperty(string property) {
+            if (property == null) {
+                throw new ArgumentNullException("property");
             }
-            public BindingMode GetBindingMode(string property) {
-                return BindingMode.Disabled;
+            if (string.IsNullOrEmpty(property)) {
+                throw Failure.EmptyString("property");
             }
         }
     }

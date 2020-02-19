@@ -27,8 +27,8 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions.Serialization {
             if (ReferenceEquals(item, null))
                 return Expression.Null;
 
-            bool first;
-            var selfVarName = context.DefineVariable(item, out first);
+            bool first = context.GetVariable(item) == null;
+            var selfVarName = context.DefineVariable(item);
 
             if (first) {
                 IList<Expression> results = new List<Expression>();
@@ -70,7 +70,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions.Serialization {
                                     ICollection<Expression> results)
         {
             // TODO Use a stack to track circular references
-            var properties = Adaptable.ReflectGetPropertiesCache(item.GetType()).Values;
+            var properties = PropertyCache.ReflectGetPropertiesCache(item.GetType()).Values;
 
             foreach (PropertyInfo pd in properties) {
                 var mode = pd.GetExpressionSerializationMode();
