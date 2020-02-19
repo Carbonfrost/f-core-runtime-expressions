@@ -41,7 +41,7 @@ dotnet/configure: -check-env-NUGET_SOURCE_URL -check-env-NUGET_PASSWORD -check-e
 
 ## Restore package dependencies
 dotnet/restore:
-	@ dotnet restore --use-lock-file ./dotnet
+	@ dotnet restore ./dotnet
 
 ## Build the dotnet solution
 dotnet/build: dotnet/restore -dotnet/build
