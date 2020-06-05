@@ -3,6 +3,8 @@
 #
 .PHONY: dotnet/generate
 
+-include eng/.mk/*.mk
+
 ## Generate generated code
 dotnet/generate:
 	srgen -c Carbonfrost.Commons.Core.Runtime.Expressions.Resources.SR \
@@ -29,6 +31,3 @@ dotnet/cover: dotnet/publish -check-command-coverlet
 		--exclude-by-attribute 'GeneratedCode' \
 		--exclude-by-attribute 'CompilerGenerated' \
 		dotnet/test/Carbonfrost.UnitTests.Core.Runtime.Expressions/bin/$(CONFIGURATION)/netcoreapp3.0/publish/Carbonfrost.UnitTests.Core.Runtime.Expressions.dll
-
--include eng/.mk/*.mk
-
