@@ -34,8 +34,6 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                 if (aObj is double || bObj is double || aObj is Undefined || bObj is Undefined) {
                     double a = ParseDouble(aObj);
                     double b = ParseDouble(bObj);
-
-                    // TODO Consider NaN handling
                     return a + b;
                 }
 

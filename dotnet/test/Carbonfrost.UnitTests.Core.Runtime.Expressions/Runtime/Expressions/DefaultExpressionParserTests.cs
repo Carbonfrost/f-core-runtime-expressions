@@ -35,5 +35,22 @@ namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
             Assert.IsInstanceOf<SyntaxErrorException>(error);
             Assert.Equal("Unexpected `)'", error.Message);
         }
+
+        [Fact]
+        public void Parse_interpolated_string() {
+            var d = new DefaultExpressionParser();
+            var result = d.Parse("`Hello ${Friend}`");
+            Assert.IsInstanceOf<InterpolatedStringExpression>(result);
+            var ise = (InterpolatedStringExpression) result;
+
+            Assert.Equal(
+                "Hello ",
+                ((InterpolatedStringTextContent) ise.Elements[0]).Text
+            );
+            Assert.IsInstanceOf(
+                typeof(NameExpression),
+                ((Interpolation) ise.Elements[1]).Value
+            );
+        }
     }
 }
