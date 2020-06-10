@@ -100,7 +100,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions.Resources {
 
   /// <summary>Unexpected end of input</summary>
     internal static string ParserUnexpectedEOF(
-
+    
     ) {
         return string.Format(Culture, ResourceFinder("ParserUnexpectedEOF") );
     }

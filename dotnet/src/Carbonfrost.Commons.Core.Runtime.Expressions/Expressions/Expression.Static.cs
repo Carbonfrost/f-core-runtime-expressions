@@ -59,8 +59,9 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         public static NewObjectExpression NewObject(Expression expression, IEnumerable<Expression> arguments) {
-            if (expression == null)
-                throw new ArgumentNullException("expression");
+            if (expression == null) {
+                throw new ArgumentNullException(nameof(expression));
+            }
 
             arguments = arguments ?? Enumerable.Empty<Expression>();
             return new NewObjectExpression(expression, arguments);
@@ -76,24 +77,28 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         public static BinaryExpression Assign(Expression left, Expression right) {
-            if (left == null)
-                throw new ArgumentNullException("left");
-            if (right == null)
-                throw new ArgumentNullException("right");
+            if (left == null) {
+                throw new ArgumentNullException(nameof(left));
+            }
+            if (right == null) {
+                throw new ArgumentNullException(nameof(right));
+            }
 
             return new BinaryExpression(ExpressionType.Assign, left, right);
         }
 
         public static CallExpression Call(Expression expression, params Expression[] arguments) {
-            if (expression == null)
-                throw new ArgumentNullException("expression");
+            if (expression == null) {
+                throw new ArgumentNullException(nameof(expression));
+            }
 
             return new CallExpression(expression, arguments ?? Enumerable.Empty<Expression>());
         }
 
         public static CallExpression Call(Expression expression, IEnumerable<Expression> arguments) {
-            if (expression == null)
-                throw new ArgumentNullException("expression");
+            if (expression == null) {
+                throw new ArgumentNullException(nameof(expression));
+            }
             return new CallExpression(expression, arguments ?? Enumerable.Empty<Expression>());
         }
 
@@ -102,10 +107,10 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         public static ConstantExpression Constant(object value) {
-            if (value == null)
+            if (value == null) {
                 return new ConstantExpression(value, typeof(object));
-            else
-                return new ConstantExpression(value, value.GetType());
+            }
+            return new ConstantExpression(value, value.GetType());
         }
 
         public static LambdaExpression Lambda(Expression body) {
@@ -118,27 +123,32 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
         public static LambdaExpression Lambda(Expression body, IExpressionContext closure, IEnumerable<LambdaParameter> parameters) {
             if (body == null) {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             return new LambdaExpression(body, closure, parameters);
         }
 
         public static MemberAccessExpression MemberAccess(Expression expression, string name) {
-            if (expression == null)
-                throw new ArgumentNullException("expression");
-            if (name == null)
-                throw new ArgumentNullException("name");
-            if (string.IsNullOrEmpty(name))
-                throw Failure.EmptyString("name");
+            if (expression == null) {
+                throw new ArgumentNullException(nameof(expression));
+            }
+            if (name == null) {
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (string.IsNullOrEmpty(name)) {
+                throw Failure.EmptyString(nameof(name));
+            }
 
             return new MemberAccessExpression(expression, name);
         }
 
         public static NameExpression Name(string name) {
-            if (name == null)
-                throw new ArgumentNullException("name");
-            if (string.IsNullOrEmpty(name))
-                throw Failure.EmptyString("name");
+            if (name == null) {
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (string.IsNullOrEmpty(name)) {
+                throw Failure.EmptyString(nameof(name));
+            }
 
             return new NameExpression(name);
         }
@@ -148,33 +158,58 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         public static BlockExpression Block(IEnumerable<Expression> expressions) {
-            if (expressions == null)
-                throw new ArgumentNullException("expressions");
+            if (expressions == null) {
+                throw new ArgumentNullException(nameof(expressions));
+            }
 
             var items = expressions.ToList().AsReadOnly();
-            if (items.Count == 0)
-                throw Failure.EmptyCollection("expressions");
+            if (items.Count == 0) {
+                throw Failure.EmptyCollection(nameof(expressions));
+            }
             return new BlockExpression(items);
         }
 
         public static BlockExpression Block(params Expression[] expressions) {
-            if (expressions == null)
-                throw new ArgumentNullException("expressions");
+            if (expressions == null) {
+                throw new ArgumentNullException(nameof(expressions));
+            }
             var items = new ReadOnlyCollection<Expression>(expressions);
-            if (items.Count == 0)
-                throw Failure.EmptyCollection("expressions");
+            if (items.Count == 0) {
+                throw Failure.EmptyCollection(nameof(expressions));
+            }
             return new BlockExpression(items);
         }
 
         public static ConditionalExpression Conditional(Expression test, Expression ifTrue, Expression ifFalse) {
-            if (test == null)
-                throw new ArgumentNullException("test");
-            if (ifTrue == null)
-                throw new ArgumentNullException("ifTrue");
-            if (ifFalse == null)
-                throw new ArgumentNullException("ifFalse");
+            if (test == null) {
+                throw new ArgumentNullException(nameof(test));
+            }
+            if (ifTrue == null) {
+                throw new ArgumentNullException(nameof(ifTrue));
+            }
+            if (ifFalse == null) {
+                throw new ArgumentNullException(nameof(ifFalse));
+            }
 
             return new ConditionalExpression(test, ifTrue, ifFalse);
+        }
+
+        public static Interpolation Interpolation(Expression value) {
+            if (value == null) {
+                throw new ArgumentNullException(nameof(value));
+            }
+            return new Interpolation(value);
+        }
+
+        public static InterpolatedStringTextContent InterpolatedStringTextContent(string text) {
+            if (text == null) {
+                throw new ArgumentNullException(nameof(text));
+            }
+            return new InterpolatedStringTextContent(text);
+        }
+
+        public static InterpolatedStringExpression InterpolatedString(params InterpolatedStringContent[] elements) {
+            return new InterpolatedStringExpression(elements);
         }
 
         public static bool TryParse(string text, out Expression result) {
@@ -226,7 +261,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
         public static Expression FromMethod(MethodInfo method, params object[] args) {
             if (method == null) {
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
             }
             if (!method.IsStatic || !method.IsPublic) {
                 throw new NotImplementedException();
@@ -240,7 +275,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
         public static Expression FromField(FieldInfo field) {
             if (field == null) {
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
             }
             if (!field.IsStatic || !field.IsPublic) {
                 throw CoreRuntimeExpressionsFailure.RequiresStaticFieldOrProperty();
@@ -251,7 +286,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
         public static Expression FromProperty(PropertyInfo property) {
             if (property == null) {
-                throw new ArgumentNullException("property");
+                throw new ArgumentNullException(nameof(property));
             }
             return Expression.MemberAccess(
                 ExpressionSerializer.CreateTypeReference(property.DeclaringType), property.Name);

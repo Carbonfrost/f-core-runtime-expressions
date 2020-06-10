@@ -96,23 +96,23 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         private bool ParseNumericOrPlus(int start) {
             if (IsParseHexNumber()) {
                 _pos += 2;
-                this.SkipHexDigits();
-                _current = new Token(TokenType.Number, Subtext(start));
+                SkipHexDigits();
+                _current = new Token(TokenType.Number, Subtext(start), false);
 
                 return true;
 
             } else if (IsNumberStart(Char)) {
-                if (this.Char == '+' || this.Char == '-') {
+                if (Char == '+' || Char == '-') {
                     _pos++;
                 }
 
-                this.SkipDigits();
-                if (MoreChars && (this.Char == '.')) {
+                SkipDigits();
+                if (MoreChars && (Char == '.')) {
                     _pos++;
                 }
 
                 if (MoreChars) {
-                    this.SkipDigits();
+                    SkipDigits();
                 }
 
                 string text = Subtext(start);
@@ -122,7 +122,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                 if (text == "-")
                     return SetToken(Token.Minus);
 
-                return SetToken(new Token(TokenType.Number, text));
+                return SetToken(new Token(TokenType.Number, text, false));
 
             } else {
                 _current = Token.UnexpectedlyFound(start + 1, Char.ToString());
@@ -150,7 +150,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
             int start = _pos;
             _pos++; // move past $
 
-            if (MoreChars && this.Char != '(') {
+            if (MoreChars && (Char != '(' || Char != '{')) {
                 _current = Token.UnexpectedlyFound(start + 1, Char);
                 return false;
             }
@@ -163,26 +163,22 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
             _pos++;
 
-            string tokenString = this.Subtext(start);
-            _current = new Token(TokenType.Property, tokenString);
+            string tokenString = Subtext(start);
+            _current = new Token(TokenType.Property, tokenString, false);
             return true;
         }
 
         private bool ParseQuotedString() {
-            char startChar = this.Char;
+            char startChar = Char;
 
             _pos++;
             int start = _pos;
             bool expandable = false;
-
-            // TODO Revisit if different semantics should be applied depending upon
-            // whether quotes or apostrophe is used
-            // Look for expansion within quoted strings:
-            // 'Hello, ${name}'
+            bool canExpand = startChar == '"' || startChar == '`';
 
             // TODO Trap unterminated expansions here
-            while (this.MoreChars && this.Char != startChar) {
-                if (this.Char == '$'
+            while (MoreChars && Char != startChar) {
+                if (Char == '$'
                     && _pos + 1 < _expression.Length
                     && _expression[_pos + 1] == '{') {
                     expandable = true;
@@ -196,8 +192,11 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                 return false;
             }
 
-            string tokenString = this.Subtext(start);
-            _current = new Token(TokenType.String, tokenString/*, expandable*/);
+            string tokenString = Subtext(start);
+
+            // Allow the string to be interpreted as an interpolated string as long as
+            // it is using ` or " (but not ')
+            _current = new Token(TokenType.String, tokenString, canExpand ? expandable : false);
             _pos++;
             return true;
         }
@@ -205,10 +204,10 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         private bool ParseRemaining() {
             int start = _pos;
 
-            if (IsNumberStart(this.Char)) {
+            if (IsNumberStart(Char)) {
                 return ParseNumericOrPlus(start);
 
-            } else if (IsSimpleStringStart(this.Char)) {
+            } else if (IsSimpleStringStart(Char)) {
                 return ParseSimpleStringOrFunction(start);
 
             } else {
@@ -218,7 +217,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         private bool ParseSimpleStringOrFunction(int start) {
-            this.SkipSimpleStringChars();
+            SkipSimpleStringChars();
 
             Token t = TryIdentAsKeyword(start);
             if (t != null) {
@@ -228,12 +227,12 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                 int myStart = _pos;
                 this.SkipWhiteSpace();
 
-                if (MoreChars && this.Char == '(') {
-                    _current = new Token(TokenType.Function, _expression.Substring(start, myStart - start));
+                if (MoreChars && Char == '(') {
+                    _current = new Token(TokenType.Function, _expression.Substring(start, myStart - start), false);
 
                 } else {
                     string tokenString = _expression.Substring(start, myStart - start);
-                    _current = new Token(TokenType.Identifier, tokenString);
+                    _current = new Token(TokenType.Identifier, tokenString, false);
                 }
             }
 
@@ -265,19 +264,24 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         private static int ScanForPropertyExpressionEnd(
             string expression, int index) {
             int count = 0;
+            var parens = new Stack<char>();
 
             while (index < expression.Length) {
                 char c = expression[index];
 
                 // Paren balancing
-                if (c == '(')
-                    count++;
+                if (c == '(' || c == '[' || c == '{') {
+                    parens.Push(c);
+                }
 
-                else if (c == ')')
-                    count--;
+                else if (c == ')' || c == ']' || c == '}') {
+                    parens.Pop();
+                    // TODO Actual balancing and tests
+                }
 
-                if (count == 0)
+                if (count == 0) {
                     return index;
+                }
 
                 index++;
             }
@@ -300,7 +304,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         private void Skip2(Func<char, bool> predicate) {
-            while (this.MoreChars && predicate(this.Char))
+            while (MoreChars && predicate(Char))
                 _pos++;
         }
 
@@ -327,13 +331,15 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         void IDisposable.Dispose() {}
 
         public bool MoveNext() {
-            if (IsError)
+            if (IsError) {
                 return false;
+            }
 
-            if (_current != null && _current.IsToken(TokenType.EndOfInput))
+            if (_current != null && _current.IsToken(TokenType.EndOfInput)) {
                 return true;
+            }
 
-            this.SkipWhiteSpace();
+            SkipWhiteSpace();
             // this.errorPosition = _pos + 1;
 
             if (PastEOF) {
@@ -341,7 +347,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                 return true;
             }
 
-            switch (this.Char) {
+            switch (Char) {
                 case '!':
                     if (LA('=')) {
                         _current = Token.NotEqualTo;
@@ -359,6 +365,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
                 case '\'':
                 case '"':
+                case '`':
                     return ParseQuotedString();
 
                 case '(':

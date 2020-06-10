@@ -1,11 +1,11 @@
 //
-// Copyright 2013 Carbonfrost Systems, Inc. (http://carbonfrost.com)
+// Copyright 2013, 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,17 +23,22 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
     class DefaultExpressionParser : IExpressionParser {
 
-        public bool Checked { get; set; }
+        public bool Checked {
+            get;
+            set;
+        }
 
         public Expression Parse(string expression, ExpressionContext context) {
             if (expression == null) {
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
             }
             if (string.IsNullOrEmpty(expression)) {
-                throw Failure.EmptyString("expression");
+                throw Failure.EmptyString(nameof(expression));
             }
+            return Parse(new Scanner(expression));
+        }
 
-            Scanner s = new Scanner(expression);
+        private Expression Parse(Scanner s) {
             if (s.MoveNext()) {
                 return ParseRoot(s);
             }
@@ -130,7 +135,8 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                             left = Expression.MakeBinary(
                                 ExpressionType.Subtract,
                                 left,
-                                -Int32.Parse(s.TakeValue()));
+                                -Int32.Parse(s.TakeValue())
+                            );
                         else
                             throw new NotImplementedException();
                         break;
@@ -158,7 +164,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         // primary_expression -> IDENT | null | true | false | DECIMAL
-        //              | HEXA | REAL | CHAR | STRING | '(' expression ')'
+        //              | HEXA | REAL | CHAR | STRING | PROPERTY | '(' expression ')'
         private Expression PrimaryExpression(Scanner s) {
             switch (s.Type) {
                 case TokenType.Identifier:
@@ -186,6 +192,11 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                     return ConvertNumber(s.TakeValue());
 
                 case TokenType.String:
+                    if (s.Current.IsExpandable) {
+                        var tkn = s.Current;
+                        s.MoveNext();
+                        return ParseInterpolated(tkn);
+                    }
                     return Expression.Constant(s.TakeValue());
 
                 case TokenType.LeftParen:
@@ -195,6 +206,19 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                     return it;
             }
             throw CoreRuntimeExpressionsFailure.SyntaxErrorUnexpected(s.Current.Value);
+        }
+
+        private InterpolatedStringExpression ParseInterpolated(Token token) {
+            // Split interpolated expressions and subparse
+            var result = new List<InterpolatedStringContent>();
+            foreach (var sub in token.Expand()) {
+                if (sub.Type == TokenType.String) {
+                    result.Add(new InterpolatedStringTextContent(sub.Value));
+                } else {
+                    result.Add(new Interpolation(Parse(new Scanner(sub.Value))));
+                }
+            }
+            return new InterpolatedStringExpression(result.ToArray());
         }
 
         // exp_function -> 'function' Identifier? '(' parameters ')' '{' function_body '}' ;

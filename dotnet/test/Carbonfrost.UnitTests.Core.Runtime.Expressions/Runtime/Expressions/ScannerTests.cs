@@ -1,5 +1,5 @@
 //
-// Copyright 2013 Carbonfrost Systems, Inc. (http://carbonfrost.com)
+// Copyright 2013, 2020 Carbonfrost Systems, Inc. (http://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -109,7 +109,6 @@ namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
             Assert.Equal(TokenType.RightParen, s.Current.Type);
         }
 
-
         [Fact]
         public void test_scanner_string_unterminated() {
             Scanner s = new Scanner("'unterminated...");
@@ -117,5 +116,34 @@ namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
             Assert.True(s.IsError);
         }
 
+        [Theory]
+        [InlineData("`")]
+        [InlineData("\"")]
+        public void Scanner_test_interpolated_string_syntax_should_Expand(string quoteChar) {
+            Scanner s = new Scanner(quoteChar + "Leading text  ${ B }" + quoteChar);
+
+            // Interpolated string tokens
+            Assert.True(s.MoveNext());
+            Assert.Equal(TokenType.String, s.Current.Type);
+            Assert.Equal("Leading text  ${ B }", s.Current.Value);
+
+            var tokens = s.Current.Expand().ToList();
+            Assert.HasCount(2, tokens);
+            Assert.Equal(TokenType.String, tokens[0].Type);
+            Assert.Equal("Leading text  ", tokens[0].Value);
+
+            Assert.Equal(TokenType.Property, tokens[1].Type);
+            Assert.Equal(" B ", tokens[1].Value);
+        }
+
+        [Fact]
+        public void Scanner_test_single_quote_does_not_interpolate() {
+            Scanner s = new Scanner("' ${ B } '");
+
+            Assert.True(s.MoveNext());
+            Assert.Equal(TokenType.String, s.Current.Type);
+            Assert.Equal(" ${ B } ", s.Current.Value);
+            Assert.False(s.Current.IsExpandable);
+        }
     }
 }

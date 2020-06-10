@@ -195,6 +195,12 @@ namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
             Assert.Equal("(a + -b) / 2", e.ToString());
         }
 
+        [Fact]
+        public void Parse_should_handle_interpolated_strings() {
+            var e = Expression.Parse("'hello ${a + b / 2}${time()}'");
+            Assert.Equal("'hello ${a + b / 2}${time()}'", e.ToString());
+        }
+
         [Theory]
         [InlineData(ExpressionType.Add, ExpressionType.Multiply)]
         [InlineData(ExpressionType.Add, ExpressionType.MultiplyChecked)]

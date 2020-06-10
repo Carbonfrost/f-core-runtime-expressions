@@ -1,11 +1,11 @@
 //
-// Copyright 2012 Carbonfrost Systems, Inc. (http://carbonfrost.com)
+// Copyright 2012, 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,110 +22,122 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
     public class ExpressionPrinter : ExpressionVisitor {
 
-        private readonly TextWriter output;
+        private readonly TextWriter _output;
 
         public TextWriter Output {
-            get { return output; }
+            get {
+                return _output;
+            }
         }
 
         public ExpressionPrinter(TextWriter output) {
-            if (output == null)
-                throw new ArgumentNullException("output");
+            if (output == null) {
+                throw new ArgumentNullException(nameof(output));
+            }
 
-            this.output = output;
+            _output = output;
         }
 
         protected override void VisitBinaryExpression(BinaryExpression expression) {
             if (expression == null) {
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
             }
 
             WriteWithParens(expression.Left, expression.LeftNeedsParens);
-            output.Write(' ');
-            output.Write(expression.ExpressionType.GetOperatorString());
-            output.Write(' ');
+            Output.Write(' ');
+            Output.Write(expression.ExpressionType.GetOperatorString());
+            Output.Write(' ');
             WriteWithParens(expression.Right, expression.RightNeedsParens);
         }
 
         protected override void VisitBlockExpression(BlockExpression expression) {
-            if (expression == null)
-                throw new ArgumentNullException("expression");
+            if (expression == null) {
+                throw new ArgumentNullException(nameof(expression));
+            }
 
             bool needComma = false;
-            output.Write("{ ");
+            Output.Write("{ ");
             foreach (var s in expression.Expressions) {
-                if (needComma)
-                    output.Write(", ");
+                if (needComma) {
+                    Output.Write(", ");
+                }
 
                 Visit(s);
                 needComma = true;
             }
-            output.Write(" }");
+            Output.Write(" }");
         }
 
         protected override void VisitUnaryExpression(UnaryExpression expression) {
             if (expression == null)
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
 
             bool post = expression.ExpressionType.ToString().StartsWith("Post", StringComparison.Ordinal);
-            if (!post)
-                output.Write(expression.ExpressionType.GetOperatorString());
+            if (!post) {
+                Output.Write(expression.ExpressionType.GetOperatorString());
+            }
 
             Visit(expression.Expression);
 
-            if (post)
-                output.Write(expression.ExpressionType.GetOperatorString());
+            if (post) {
+                Output.Write(expression.ExpressionType.GetOperatorString());
+            }
 
         }
 
         protected override void VisitNewArrayExpression(NewArrayExpression expression) {
-            if (expression == null)
-                throw new ArgumentNullException("expression");
+            if (expression == null) {
+                throw new ArgumentNullException(nameof(expression));
+            }
 
             bool needComma = false;
-            output.Write("[ ");
+            Output.Write("[ ");
             foreach (var s in expression.Expressions) {
-                if (needComma)
-                    output.Write(", ");
+                if (needComma) {
+                    Output.Write(", ");
+                }
 
                 Visit(s);
                 needComma = true;
             }
-            output.Write(" ]");
+            Output.Write(" ]");
         }
 
         protected override void VisitNewObjectExpression(NewObjectExpression expression) {
-            if (expression == null)
-                throw new ArgumentNullException("expression");
+            if (expression == null) {
+                throw new ArgumentNullException(nameof(expression));
+            }
 
-            output.Write("new ");
+            Output.Write("new ");
             Visit(expression.Expression);
             VisitArguments(expression.Arguments);
         }
 
         protected override void VisitConstantExpression(ConstantExpression expression) {
-            if (expression == null)
-                throw new ArgumentNullException("expression");
+            if (expression == null) {
+                throw new ArgumentNullException(nameof(expression));
+            }
 
             WriteConstant(expression.Value);
         }
 
         protected override void VisitValueExpression(ValueExpression expression) {
-            if (expression == null)
-                throw new ArgumentNullException("expression");
+            if (expression == null) {
+                throw new ArgumentNullException(nameof(expression));
+            }
 
             // TODO Could be more complex
             WriteConstant(expression.Value);
         }
 
         protected override void VisitNameExpression(NameExpression expression) {
-            output.Write(expression.Name);
+            Output.Write(expression.Name);
         }
 
         protected override void VisitMemberAccessExpression(MemberAccessExpression expression) {
             Visit(expression.Expression);
-            output.Write('.');
-            output.Write(expression.Name);
+            Output.Write('.');
+            Output.Write(expression.Name);
         }
 
         protected override void VisitCallExpression(CallExpression expression) {
@@ -133,29 +145,44 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
             VisitArguments(expression.Arguments);
         }
 
+        protected override void VisitInterpolatedStringExpression(InterpolatedStringExpression expression) {
+            Output.Write("'");
+            foreach (var s in expression.Elements) {
+                if (s is InterpolatedStringTextContent tc) {
+                    Output.Write(tc.Text);
+                } else {
+                    Output.Write("${");
+                    Visit(s.ToExpression());
+                    Output.Write("}");
+                }
+            }
+            Output.Write("'");
+        }
+
         void VisitArguments(IEnumerable<Expression> arguments) {
-            output.Write('(');
+            Output.Write('(');
 
             bool comma = false;
             foreach (var arg in arguments) {
                 if (comma) {
-                    output.Write(", ");
+                    Output.Write(", ");
                 }
 
                 Visit(arg);
                 comma = true;
             }
 
-            output.Write(')');
+            Output.Write(')');
         }
 
         void WriteConstant(object value) {
-            output.Write(GetConstant(value));
+            Output.Write(GetConstant(value));
         }
 
         string GetConstant(object value) {
-            if (ReferenceEquals(value, null))
+            if (ReferenceEquals(value, null)) {
                 return "null";
+            }
 
             switch (Type.GetTypeCode(value.GetType())) {
 
@@ -203,19 +230,19 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
         void WriteWithParens(Expression e, bool needParens) {
             if (needParens) {
-                output.Write("(");
+                Output.Write("(");
             }
             Visit(e);
             if (needParens) {
-                output.Write(")");
+                Output.Write(")");
             }
         }
 
         static string FormatChar(char c) {
-            if (Scanner.IsPrintable(c))
+            if (Scanner.IsPrintable(c)) {
                 return string.Format("'{0}'", c);
-            else
-                return string.Format("'\\u{0:x4}'", (int) c);
+            }
+            return string.Format("'\\u{0:x4}'", (int) c);
         }
     }
 

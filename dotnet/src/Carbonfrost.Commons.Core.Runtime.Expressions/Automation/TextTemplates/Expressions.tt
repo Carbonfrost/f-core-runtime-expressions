@@ -1,9 +1,9 @@
 <#@ template language="C#" #>
-<#@ output extension=".g.cs" #>
-<#@ import namespace="System" #>
-<#@ import namespace="System.Linq" #>
 <#@ assembly name="System.Core" #>
-<#@ assembly name="System.Linq" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".g.cs" #>
+
 <#
 
     // Leaf expression types
@@ -18,7 +18,7 @@
         "NewObjectExpression",
         "NewArrayExpression",
         "LambdaExpression",
-        // TODO "BetweenAndExpression"
+        "InterpolatedStringExpression",
     };
 
     string[] arithmeticExpressions = {

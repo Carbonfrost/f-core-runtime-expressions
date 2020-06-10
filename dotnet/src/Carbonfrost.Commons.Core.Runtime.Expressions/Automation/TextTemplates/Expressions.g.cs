@@ -1,4 +1,5 @@
-﻿    // Generated at 02/16/2020 18:55:16
+
+    // Generated at 06/06/2020 17:20:03
 
 using System;
 using Carbonfrost.Commons.Core.Runtime;
@@ -1580,6 +1581,83 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         public override ExpressionType ExpressionType {
             get {
                 return ExpressionType.Lambda;
+            }
+        }
+
+        protected internal override TResult AcceptVisitor<TResult>(IExpressionVisitor<TResult> visitor) {
+            if (visitor == null)
+                throw new ArgumentNullException("visitor");
+
+            return visitor.Visit(this);
+        }
+
+        protected internal override TResult AcceptVisitor<TArgument, TResult>(IExpressionVisitor<TArgument, TResult> visitor, TArgument argument) {
+            if (visitor == null)
+                throw new ArgumentNullException("visitor");
+
+            return visitor.Visit(this, argument);
+        }
+
+        protected internal override void AcceptVisitor(IExpressionVisitor visitor) {
+            if (visitor == null)
+                throw new ArgumentNullException("visitor");
+
+            visitor.Visit(this);
+        }
+    }
+
+
+    public partial interface IExpressionVisitor {
+        void Visit(InterpolatedStringExpression expression);
+    }
+
+    public partial class ExpressionVisitor {
+
+        protected virtual void VisitInterpolatedStringExpression(InterpolatedStringExpression expression) {
+            DefaultVisit(expression);
+        }
+
+        void IExpressionVisitor.Visit(InterpolatedStringExpression expression) {
+            VisitInterpolatedStringExpression(expression);
+        }
+    }
+
+    public partial interface IExpressionVisitor<in TArgument, out TResult> {
+        TResult Visit(InterpolatedStringExpression expression, TArgument argument);
+    }
+
+    public partial class ExpressionVisitor<TArgument, TResult> {
+
+        protected virtual TResult VisitInterpolatedStringExpression(InterpolatedStringExpression expression, TArgument argument) {
+            return DefaultVisit(expression, argument);
+        }
+
+        TResult IExpressionVisitor<TArgument,TResult>.Visit(InterpolatedStringExpression expression, TArgument argument) {
+            return VisitInterpolatedStringExpression(expression, argument);
+        }
+    }
+
+    public partial interface IExpressionVisitor<out TResult> {
+        TResult Visit(InterpolatedStringExpression expression);
+    }
+
+    public partial class ExpressionVisitor<TResult> {
+
+        protected virtual TResult VisitInterpolatedStringExpression(InterpolatedStringExpression expression) {
+            return DefaultVisit(expression);
+        }
+
+        TResult IExpressionVisitor<TResult>.Visit(InterpolatedStringExpression expression) {
+            return VisitInterpolatedStringExpression(expression);
+        }
+
+    }
+
+    public partial class InterpolatedStringExpression {
+
+        public override ExpressionType ExpressionType {
+            get {
+                return ExpressionType.InterpolatedString;
             }
         }
 

@@ -27,7 +27,6 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions.Serialization {
         private readonly Dictionary<Type, int> _variables = new Dictionary<Type, int>();
         private readonly ObjectIDGenerator _seen = new ObjectIDGenerator();
 
-        // TODO Could store this in an array instead
         private readonly Dictionary<long, string> _variableNames = new Dictionary<long, string>();
 
         public bool IsDisposed {
@@ -40,10 +39,10 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions.Serialization {
             bool firstTime;
             long id = _seen.HasId(value, out firstTime);
 
-            if (id == 0)
+            if (id == 0) {
                 return null;
-            else
-                return _variableNames.GetValueOrDefault(id);
+            }
+            return _variableNames.GetValueOrDefault(id);
         }
 
         public string DefineVariable(object value) {

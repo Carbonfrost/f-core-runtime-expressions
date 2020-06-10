@@ -15,7 +15,10 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Carbonfrost.Commons.Core.Runtime.Expressions.Resources;
 
 namespace Carbonfrost.Commons.Core.Runtime.Expressions {
@@ -68,7 +71,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         public bool Expandable { get { return expandable; } }
 
         internal StringToken(string tokenString, bool expandable)
-            : base(TokenType.String, tokenString) {
+            : base(TokenType.String, tokenString, expandable) {
             this.expandable = expandable;
         }
     }
@@ -78,7 +81,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         public readonly string Message;
         public readonly int ErrorPosition;
 
-        internal ErrorToken(int position, string message) : base(TokenType.Error, null) {
+        internal ErrorToken(int position, string message) : base(TokenType.Error, null, false) {
             Message = message;
             ErrorPosition = position;
         }
@@ -130,12 +133,14 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
         private readonly string _text;
         private readonly TokenType _type;
+        private readonly bool _expandable;
 
-        private Token(TokenType type) : this(type, null) {}
+        private Token(TokenType type) : this(type, null, false) {}
 
-        internal Token(TokenType type, string tokenString) {
+        internal Token(TokenType type, string tokenString, bool expandable) {
             _type = type;
             _text = tokenString;
+            _expandable = expandable;
         }
 
         internal TokenType Type {
@@ -144,8 +149,10 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
             }
         }
 
-        internal bool IsToken(TokenType type) {
-            return _type == type;
+        public bool IsExpandable {
+            get {
+                return _expandable;
+            }
         }
 
         internal string Value {
@@ -238,6 +245,33 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                         return null;
                 }
             }
+        }
+
+        internal bool IsToken(TokenType type) {
+            return _type == type;
+        }
+
+        // TODO Use bracket counting ... the expression $(a+b+(c+d)) is valid, for instance
+
+        private static readonly Regex EXPR_FORMAT = new Regex(@"\$ (
+(\{ (?<Expression> [^\}]+) \}) | (?<Expression> [:a-z0-9_\.]+) )", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+
+        internal IEnumerable<Token> Expand() {
+            return ExpandCore().Where(t => t.Value.Length > 0);
+        }
+
+        private IEnumerable<Token> ExpandCore() {
+            string text = Value;
+            MatchCollection matches = EXPR_FORMAT.Matches(text);
+            int previousIndex = 0;
+            foreach (Match match in matches) {
+                yield return new Token(TokenType.String, text.Substring(previousIndex, match.Index - previousIndex), false);
+
+                string expText = match.Groups["Expression"].Value;
+                yield return new Token(TokenType.Property, expText, false);
+                previousIndex = match.Index + match.Length;
+            }
+            yield return new Token(TokenType.String, text.Substring(previousIndex, text.Length - previousIndex), false);
         }
 
     }
