@@ -1,5 +1,5 @@
 //
-// Copyright 2013, 2016, 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
+// Copyright 2013, 2016, 2020-2021 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -174,10 +174,15 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
             _pos++;
             int start = _pos;
             bool expandable = false;
-            bool canExpand = startChar == '"' || startChar == '`';
+            bool canExpand = startChar == '`';
 
             // TODO Trap unterminated expansions here
             while (MoreChars && Char != startChar) {
+                if (Char == '\\' && LA('$')) {
+                    _pos += 2;
+                    continue;
+                }
+
                 if (Char == '$'
                     && _pos + 1 < _expression.Length
                     && _expression[_pos + 1] == '{') {

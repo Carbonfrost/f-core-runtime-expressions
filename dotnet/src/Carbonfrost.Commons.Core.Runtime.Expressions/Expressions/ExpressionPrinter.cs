@@ -146,7 +146,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
         }
 
         protected override void VisitInterpolatedStringExpression(InterpolatedStringExpression expression) {
-            Output.Write("'");
+            Output.Write("`");
             foreach (var s in expression.Elements) {
                 if (s is InterpolatedStringTextContent tc) {
                     Output.Write(tc.Text);
@@ -156,7 +156,7 @@ namespace Carbonfrost.Commons.Core.Runtime.Expressions {
                     Output.Write("}");
                 }
             }
-            Output.Write("'");
+            Output.Write("`");
         }
 
         void VisitArguments(IEnumerable<Expression> arguments) {

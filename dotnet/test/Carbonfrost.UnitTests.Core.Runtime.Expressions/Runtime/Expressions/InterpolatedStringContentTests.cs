@@ -1,5 +1,5 @@
 //
-// Copyright 2013, 2021 Carbonfrost Systems, Inc. (https://carbonfrost.com)
+// Copyright 2021 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,22 +19,22 @@ using Carbonfrost.Commons.Spec;
 
 namespace Carbonfrost.UnitTests.Core.Runtime.Expressions {
 
-    public partial class DefaultExpressionParserTests {
+    public class InterpolatedStringContentTests {
 
         [Fact]
-        public void Parse_unterminated_quoted_string() {
-            var d = new DefaultExpressionParser();
-            Assert.Throws<SyntaxErrorException>(() => d.Parse("3 + 'unterminated"));
+        public void Interpolation_should_provide_correct_values() {
+            var example = InterpolatedStringContent.TextContent("hello");
+
+            Assert.False(example.IsInterpolation);
+            Assert.Equal(InterpolatedStringContentType.TextContent, example.InterpolatedStringContentType);
         }
 
         [Fact]
-        public void Parse_unexpected_token_error() {
-            var d = new DefaultExpressionParser();
-            var error = Record.Exception(() => d.Parse(")"));
+        public void TextContent_should_provide_correct_values() {
+            var example = InterpolatedStringContent.Interpolation(Expression.Name("who"));
 
-            Assert.IsInstanceOf<SyntaxErrorException>(error);
-            Assert.Equal("Unexpected `)'", error.Message);
+            Assert.True(example.IsInterpolation);
+            Assert.Equal(InterpolatedStringContentType.Interpolation, example.InterpolatedStringContentType);
         }
-
     }
 }

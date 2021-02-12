@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Carbonfrost Systems, Inc. (https://carbonfrost.com)
+// Copyright 2021 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,22 +16,9 @@
 
 namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
-    public sealed class InterpolatedStringTextContent : InterpolatedStringContent {
-
-        private readonly string _text;
-
-        public string Text {
-            get {
-                return _text;
-            }
-        }
-
-        internal InterpolatedStringTextContent(string text) {
-            _text = text;
-        }
-
-        internal override Expression ToExpression() {
-            return Expression.Constant(_text);
-        }
+    public enum InterpolatedStringContentType {
+        Interpolation,
+        TextContent,
     }
+
 }

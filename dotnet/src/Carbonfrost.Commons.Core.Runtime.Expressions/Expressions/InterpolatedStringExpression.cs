@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Carbonfrost Systems, Inc. (https://carbonfrost.com)
+// Copyright 2020-2021 Carbonfrost Systems, Inc. (https://carbonfrost.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ using System.Linq;
 
 namespace Carbonfrost.Commons.Core.Runtime.Expressions {
 
-    public partial class InterpolatedStringExpression : Expression {
+    public sealed partial class InterpolatedStringExpression : Expression {
 
-        private InterpolatedStringContent[] _elements;
+        private readonly InterpolatedStringContent[] _elements;
 
         public IReadOnlyList<InterpolatedStringContent> Elements {
             get {
