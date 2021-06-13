@@ -3,7 +3,9 @@
 #
 .PHONY: dotnet/generate
 
--include eng/.mk/*.mk
+FSPEC_OPTIONS ?= -t ~integration
+
+-include eng/Makefile
 
 ## Generate generated code
 dotnet/generate:
@@ -17,7 +19,7 @@ dotnet/generate:
 dotnet/test: dotnet/publish -dotnet/test
 
 -dotnet/test:
-	$(Q) fspec -i dotnet/test/Carbonfrost.UnitTests.Core.Runtime.Expressions/Content \
+	$(Q) fspec $(FSPEC_OPTIONS) -i dotnet/test/Carbonfrost.UnitTests.Core.Runtime.Expressions/Content \
 		dotnet/test/Carbonfrost.UnitTests.Core.Runtime.Expressions/bin/$(CONFIGURATION)/netcoreapp3.0/publish/Carbonfrost.UnitTests.Core.Runtime.Expressions.dll
 
 ## Run unit tests with code coverage
